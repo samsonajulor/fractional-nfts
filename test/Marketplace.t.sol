@@ -36,7 +36,8 @@ contract MarketPlaceTest is Helpers {
             sig: bytes(""),
             deadline: 0,
             lister: address(0),
-            active: false
+            active: false,
+            totalShares: 0
         });
 
         // mint NFT
