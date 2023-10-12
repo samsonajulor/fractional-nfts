@@ -241,12 +241,12 @@ contract Marketplace {
     function getListing(
         uint256 _listingId
     ) public view returns (Listing memory) {
-        // if (_listingId >= listingId)
+        if (_listingId >= listingId) revert ListingNotExistent();
         return listings[_listingId];
     }
 
     function withdrawPlatformFees() public {
-        require(msg.sender == admin, "Only admin can withdraw platform fees");
+        if (msg.sender != admin) revert NotOwner();
         uint256 feeToWithdraw = platformBalance;
         platformBalance = 0;
         payable(admin).transfer(feeToWithdraw);
