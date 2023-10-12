@@ -1,66 +1,85 @@
-## Foundry
+## Smart Contract Overview
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The `Marketplace` smart contract has several functions, data structures, errors, and events. Before you start using it, it's important to grasp its key components:
 
-Foundry consists of:
+- `Listing` struct: Represents a listing with attributes such as the token address, token ID, price, signature, deadline, lister's address, and activity status.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- `listings` mapping: Stores all listings with a unique identifier (listing ID) as the key.
 
-## Documentation
+- `admin` address: Represents the administrator of the contract, set during deployment.
 
-https://book.getfoundry.sh/
+- `listingId` variable: Keeps track of the total number of listings created.
 
-## Usage
+- Error messages: These are custom error messages that can be thrown in case of specific conditions not being met during contract execution.
 
-### Build
+- Events: The contract emits events when listings are created, executed, or edited.
 
-```shell
-$ forge build
-```
+## Key Functions
 
-### Test
+### 1. `createListing`
 
-```shell
-$ forge test
-```
+This function allows users to create a new listing for an ERC721 token.
 
-### Format
+Parameters:
+- `Listing calldata l`: A `Listing` struct that contains information about the listing.
 
-```shell
-$ forge fmt
-```
+Actions and Checks:
+- Checks if the sender is the owner of the ERC721 token.
+- Verifies if the sender has approved the contract to manage the token.
+- Ensures that the price is not less than 0.01 ether.
+- Checks if the listing's deadline is in the future and at least 60 minutes away.
+- Validates the provided signature.
+- Appends the new listing to the storage.
+- Emits a `ListingCreated` event.
 
-### Gas Snapshots
+### 2. `executeListing`
 
-```shell
-$ forge snapshot
-```
+This function allows users to execute a listing by purchasing the ERC721 token.
 
-### Anvil
+Parameters:
+- `uint256 _listingId`: The ID of the listing to execute.
+- Sends ETH to the contract to match the listing's price.
 
-```shell
-$ anvil
-```
+Actions and Checks:
+- Checks if the specified listing exists.
+- Verifies that the listing has not expired.
+- Ensures that the listing is active.
+- Checks if the sent ETH matches the listing price.
+- Transfers the ERC721 token to the buyer and the price to the seller.
+- Emits a `ListingExecuted` event.
 
-### Deploy
+### 3. `editListing`
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+This function allows the lister of a listing to edit its price and activity status.
 
-### Cast
+Parameters:
+- `uint256 _listingId`: The ID of the listing to edit.
+- `uint256 _newPrice`: The new price for the listing.
+- `bool _active`: The new activity status for the listing.
 
-```shell
-$ cast <subcommand>
-```
+Actions and Checks:
+- Checks if the specified listing exists.
+- Ensures that the sender is the lister of the listing.
+- Updates the listing's price and activity status.
+- Emits a `ListingEdited` event.
 
-### Help
+### 4. `getListing`
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+This function allows users to retrieve information about a specific listing by its ID.
+
+Parameters:
+- `uint256 _listingId`: The ID of the listing to retrieve.
+
+Actions and Checks:
+- Retrieves the information of the listing based on its ID.
+
+## Usage Guide
+
+### For Developers
+
+1. **Deployment**: Deploy the `Marketplace` contract to the Ethereum network. Ensure that you specify the contract's administrator during deployment.
+
+2. **Interacting with the Contract**: Developers can interact with the contract by calling its functions programmatically. This can be done using libraries like Web3.js or ethers.js in JavaScript or using the appropriate libraries in your preferred programming language.
+
+3. **Error Handling**: Developers should handle errors gracefully when interacting with the contract. These errors are defined in the contract as custom error types.
+
